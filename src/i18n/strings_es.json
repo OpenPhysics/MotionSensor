@@ -1,0 +1,122 @@
+{
+  "title": "Sensor de movimiento",
+  "screens": {
+    "simulation": "Simulación",
+    "sensor": "Sensor de movimiento"
+  },
+  "showGraph": "Mostrar la gráfica",
+  "showTable": "Mostrar la tabla",
+  "motionDiagram": "Diagrama de movimiento · puntos cada 1 s",
+  "showMotionDiagram": "Mostrar diagrama de movimiento",
+  "showVelocityVectors": "Mostrar vectores de velocidad",
+  "axes": {
+    "time": "Tiempo",
+    "position": "Posición",
+    "velocity": "Velocidad",
+    "acceleration": "Aceleración"
+  },
+  "run": {
+    "record": "Grabar",
+    "stop": "Detener",
+    "clear": "Borrar",
+    "sampleRate": "Frecuencia de muestreo",
+    "sampleRatePattern": "{{rate}} Hz",
+    "elapsedPattern": "{{time}} s",
+    "connectFirst": "Conecta un sensor para grabar"
+  },
+  "graph": {
+    "vs": "frente a",
+    "xAxis": "Eje horizontal",
+    "yAxis": "Eje vertical",
+    "rescale": "Ajustar los ejes a los datos",
+    "zoomIn": "Acercar",
+    "zoomOut": "Alejar",
+    "panLeft": "Desplazar a la izquierda",
+    "panRight": "Desplazar a la derecha",
+    "panUp": "Desplazar hacia arriba",
+    "panDown": "Desplazar hacia abajo",
+    "xAxisChanged": "El eje horizontal ahora es {{property}}. La gráfica se ha borrado.",
+    "yAxisChanged": "El eje vertical ahora es {{property}}. La gráfica se ha borrado."
+  },
+  "table": {
+    "columnA": "Primera columna",
+    "columnB": "Segunda columna",
+    "download": "Descargar CSV",
+    "rowsPattern": "Filas {{first}} a {{last}} de {{total}}",
+    "empty": "Todavía no hay datos grabados",
+    "scrollUp": "Desplazar la tabla hacia arriba",
+    "scrollDown": "Desplazar la tabla hacia abajo",
+    "headerPattern": "{{name}} ({{unit}})"
+  },
+  "sensor": {
+    "connect": "Conectar el sensor",
+    "disconnect": "Desconectar",
+    "statusDisconnected": "Desconectado",
+    "statusConnecting": "Conectando…",
+    "statusConnected": "Conectado",
+    "statusError": "Problema de conexión",
+    "lostConnection": "El sensor se ha desconectado.",
+    "unavailableInsecure": "Web Bluetooth necesita una página segura. Abre esta simulación por HTTPS, o en localhost.",
+    "unavailableBrowser": "Este navegador no puede conectarse al sensor. Usa Chrome, Edge u Opera.",
+    "rawPositionPattern": "Sensor: {{position}} m"
+  },
+  "sensorOptions": {
+    "title": "Opciones del sensor",
+    "changeSign": "Cambiar el signo",
+    "zeroAtStart": "Poner el sensor a cero al empezar",
+    "zeroNow": "Poner a cero ahora",
+    "removeZero": "Quitar el desplazamiento de cero",
+    "range": "Alcance",
+    "rangeLong": "Largo",
+    "rangeShort": "Corto",
+    "offsetPattern": "Desplazamiento de cero: {{offset}} m"
+  },
+  "preferences": {
+    "title": "Simulación",
+    "showDiagnostics": "Mostrar el diagnóstico del sensor"
+  },
+  "a11y": {
+    "simulation": {
+      "screenSummary": {
+        "playArea": "El área de juego muestra una pista con un caminante que puedes arrastrar, y una gráfica del movimiento que grabas.",
+        "controlArea": "El área de control tiene los dos selectores de eje de la gráfica, las casillas mostrar la gráfica y mostrar la tabla, la tabla de datos con sus selectores de columna y su descarga CSV, el selector de frecuencia de muestreo, los botones grabar, detener y borrar, y un botón Restablecer todo.",
+        "interactionHint": "Pulsa Grabar y arrastra el caminante por la pista mientras la gráfica dibuja tu movimiento."
+      },
+      "currentDetails": {
+        "ready": "Listo para grabar. Todavía no se ha grabado nada.",
+        "recording": "Grabando. {{time}} segundos hasta ahora.",
+        "stopped": "Grabación detenida tras {{time}} segundos.",
+        "waitingForSensor": "Esperando a que se conecte un sensor de movimiento."
+      },
+      "controls": {
+        "walker": "Caminante",
+        "walkerHelp": "Muévete a izquierda y derecha para cambiar tu distancia al sensor.",
+        "recordButton": "Empezar a grabar",
+        "stopButton": "Detener la grabación",
+        "clearButton": "Borrar el movimiento grabado"
+      }
+    },
+    "sensor": {
+      "screenSummary": {
+        "playArea": "El área de juego muestra una pista con un marcador que sigue al sensor de movimiento, y una gráfica del movimiento que grabas.",
+        "controlArea": "El área de control tiene los dos selectores de eje de la gráfica, las casillas mostrar la gráfica y mostrar la tabla, la tabla de datos con sus selectores de columna y su descarga CSV, el selector de frecuencia de muestreo, el panel de conexión del sensor, el panel de opciones del sensor, los botones grabar, detener y borrar, y un botón Restablecer todo.",
+        "interactionHint": "Conecta el sensor, pulsa Grabar y camina hacia él o aléjate mientras la gráfica dibuja tu movimiento."
+      },
+      "currentDetails": {
+        "ready": "Listo para grabar. Todavía no se ha grabado nada.",
+        "recording": "Grabando. {{time}} segundos hasta ahora.",
+        "stopped": "Grabación detenida tras {{time}} segundos.",
+        "waitingForSensor": "Esperando a que se conecte un sensor de movimiento."
+      },
+      "controls": {
+        "walker": "Lectura del sensor",
+        "walkerHelp": "Este marcador sigue al sensor de movimiento. Camina hacia el sensor o aléjate para moverlo.",
+        "connectButton": "Conectarse a un sensor de movimiento inalámbrico PASCO",
+        "disconnectButton": "Desconectar el sensor de movimiento",
+        "recordButton": "Empezar a grabar",
+        "stopButton": "Detener la grabación",
+        "clearButton": "Borrar el movimiento grabado"
+      }
+    }
+  }
+}

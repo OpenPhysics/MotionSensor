@@ -1,0 +1,91 @@
+# Motion Sensor
+
+[![CI](https://github.com/OpenPhysics/MotionSensor/actions/workflows/ci.yml/badge.svg)](https://github.com/OpenPhysics/MotionSensor/actions/workflows/ci.yml)
+
+Record how something moves and read the result off a graph you configure
+yourself — with the mouse on one screen, or by walking in front of a PASCO
+Wireless Motion Sensor over Web Bluetooth on the other. Position, velocity and
+acceleration are all measured from the same motion, so the relationships between
+them are something you discover rather than something the simulation asserts.
+
+## Features
+
+- **A graph you configure.** Two combo boxes pick what goes on each axis from
+  position, velocity, acceleration and time. Position against time, velocity
+  against time, acceleration against time — or velocity against position, for a
+  phase plot the sim never had to be told about. Switching an axis redraws the
+  recording you already made; you never have to walk it twice.
+- **One motion, three quantities.** Velocity and acceleration are trailing
+  derivatives of the very position trace on screen, never separate measurements,
+  so a turnaround shows up in all three at once.
+- **A graph you can handle.** Drag it by its header, resize it from a corner,
+  zoom with the wheel or the buttons, pan, or rescale it to fit the data.
+- **Two screens, one activity.** Drag a figure with mouse, touch or keyboard;
+  then do the same thing with a real **PASCO Wireless Motion Sensor (PS-3219)**
+  over Web Bluetooth — no driver, no app, no install.
+- **One clock, whatever the frame rate.** Samples are taken on the model's own
+  fixed 20 Hz clock, so the same walk gives the same graph on a 60 Hz laptop and
+  a 144 Hz display.
+- **Fully keyboard operable**, with a live screen-reader summary of the
+  recording and spoken announcements when an axis changes.
+- Installable and offline-capable (PWA), with a projector-friendly colour
+  profile and English, French and Spanish.
+
+## Quick Start
+
+```bash
+npm install
+npm run icons     # generate PWA icons on a fresh clone
+npm start         # → http://localhost:5173
+```
+
+To use a real sensor, open the **Motion Sensor** screen in **Chrome, Edge or
+Opera** over HTTPS (or `localhost`), switch the PS-3219 on, and press *Connect
+Sensor*. Stand the sensor at waist height with three or four metres of clear
+floor in front of it. Firefox and Safari have no Web Bluetooth; the screen says
+so instead of offering a button that cannot work.
+
+Add `?showDiagnostics=true` to see the device's measurement list and its raw
+readings — useful when bringing hardware up.
+
+## Scripts
+
+| Command | Description |
+|---|---|
+| `npm start` / `npm run dev` | Vite dev server |
+| `npm run build` | Type-check + production build |
+| `npm run build:single` | Single self-contained `dist/index.html` |
+| `npm run preview` | Preview the production build |
+| `npm run check` | TypeScript across app, scripts and tests |
+| `npm run lint` / `npm run fix` | Biome check / auto-fix |
+| `npm test` | Vitest unit tests |
+| `npm run test:fuzz` | Playwright fuzz smoke (`?fuzz&ea`) |
+| `npm run test:fuzz:quick` | 10-second fuzz |
+| `npm run icons` | Regenerate PWA icons |
+| `npm run clean` | Remove `dist/` |
+
+## Tech Stack
+
+| Tool | Version | Notes |
+|---|---|---|
+| SceneryStack | ^3.0.0 | Simulation framework; `bamboo` for the graph |
+| Web Bluetooth | browser API | Direct, dependency-free PS-3219 communication |
+| Vite | ^8 | Build tool and dev server |
+| TypeScript | ^7 | `erasableSyntaxOnly` — no `enum`, no `namespace` |
+| Biome | ^2.5 | Lint + format |
+| Vitest | ^4 | Unit tests (`happy-dom`) |
+| Playwright | ^1.62 | Fuzz smoke test |
+| vite-plugin-pwa | ^1 | Installable / offline |
+
+Hardware: **PASCO Wireless Motion Sensor PS-3219** (0.15–4 m, 1 mm resolution,
+Bluetooth 5.2). Web Bluetooth requires a Chromium-based browser and a secure
+origin.
+
+## License
+
+GNU Affero General Public License v3.0 or later — see the
+[org LICENSE](https://github.com/OpenPhysics/.github/blob/main/LICENSE).
+
+## Contributing
+
+See the [org contributing guide](https://github.com/OpenPhysics/.github/blob/main/CONTRIBUTING.md).

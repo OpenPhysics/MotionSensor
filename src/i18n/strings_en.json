@@ -1,0 +1,122 @@
+{
+  "title": "Motion Sensor",
+  "screens": {
+    "simulation": "Simulation",
+    "sensor": "Motion Sensor"
+  },
+  "showGraph": "Show graph",
+  "showTable": "Show table",
+  "motionDiagram": "Motion diagram · dots every 1 s",
+  "showMotionDiagram": "Show motion diagram",
+  "showVelocityVectors": "Show velocity vectors",
+  "axes": {
+    "time": "Time",
+    "position": "Position",
+    "velocity": "Velocity",
+    "acceleration": "Acceleration"
+  },
+  "run": {
+    "record": "Record",
+    "stop": "Stop",
+    "clear": "Clear",
+    "sampleRate": "Sample rate",
+    "sampleRatePattern": "{{rate}} Hz",
+    "elapsedPattern": "{{time}} s",
+    "connectFirst": "Connect a sensor to record"
+  },
+  "graph": {
+    "vs": "vs",
+    "xAxis": "Horizontal axis",
+    "yAxis": "Vertical axis",
+    "rescale": "Rescale the axes to fit the data",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "panLeft": "Pan left",
+    "panRight": "Pan right",
+    "panUp": "Pan up",
+    "panDown": "Pan down",
+    "xAxisChanged": "Horizontal axis is now {{property}}. The graph was cleared.",
+    "yAxisChanged": "Vertical axis is now {{property}}. The graph was cleared."
+  },
+  "table": {
+    "columnA": "First column",
+    "columnB": "Second column",
+    "download": "Download CSV",
+    "rowsPattern": "Rows {{first}}–{{last}} of {{total}}",
+    "empty": "No data recorded yet",
+    "scrollUp": "Scroll the table up",
+    "scrollDown": "Scroll the table down",
+    "headerPattern": "{{name}} ({{unit}})"
+  },
+  "sensor": {
+    "connect": "Connect Sensor",
+    "disconnect": "Disconnect",
+    "statusDisconnected": "Disconnected",
+    "statusConnecting": "Connecting…",
+    "statusConnected": "Connected",
+    "statusError": "Connection problem",
+    "lostConnection": "The sensor disconnected.",
+    "unavailableInsecure": "Web Bluetooth needs a secure page. Open this simulation over HTTPS, or on localhost.",
+    "unavailableBrowser": "This browser cannot connect to the sensor. Use Chrome, Edge, or Opera.",
+    "rawPositionPattern": "Sensor: {{position}} m"
+  },
+  "sensorOptions": {
+    "title": "Sensor options",
+    "changeSign": "Change sign",
+    "zeroAtStart": "Zero sensor measurements at start",
+    "zeroNow": "Zero Sensor Now",
+    "removeZero": "Remove Sensor Zero Offset",
+    "range": "Range",
+    "rangeLong": "Long",
+    "rangeShort": "Short",
+    "offsetPattern": "Zero offset: {{offset}} m"
+  },
+  "preferences": {
+    "title": "Simulation",
+    "showDiagnostics": "Show sensor diagnostics"
+  },
+  "a11y": {
+    "simulation": {
+      "screenSummary": {
+        "playArea": "The play area shows a track with a walker you can drag, and a graph of the motion you record.",
+        "controlArea": "The control area has the graph's two axis choosers, the show graph and show table checkboxes, the data table with its column choosers and CSV download, the sample rate chooser, the record, stop and clear buttons, and a Reset All button.",
+        "interactionHint": "Press Record, then drag the walker along the track and watch the graph draw your motion."
+      },
+      "currentDetails": {
+        "ready": "Ready to record. Nothing recorded yet.",
+        "recording": "Recording. {{time}} seconds so far.",
+        "stopped": "Recording stopped after {{time}} seconds.",
+        "waitingForSensor": "Waiting for a motion sensor to be connected."
+      },
+      "controls": {
+        "walker": "Walker",
+        "walkerHelp": "Move left and right to change your distance from the sensor.",
+        "recordButton": "Start recording",
+        "stopButton": "Stop recording",
+        "clearButton": "Clear the recorded motion"
+      }
+    },
+    "sensor": {
+      "screenSummary": {
+        "playArea": "The play area shows a track with a marker that follows the motion sensor, and a graph of the motion you record.",
+        "controlArea": "The control area has the graph's two axis choosers, the show graph and show table checkboxes, the data table with its column choosers and CSV download, the sample rate chooser, the sensor connection panel, the sensor options panel, the record, stop and clear buttons, and a Reset All button.",
+        "interactionHint": "Connect the sensor, press Record, then walk toward or away from it and watch the graph draw your motion."
+      },
+      "currentDetails": {
+        "ready": "Ready to record. Nothing recorded yet.",
+        "recording": "Recording. {{time}} seconds so far.",
+        "stopped": "Recording stopped after {{time}} seconds.",
+        "waitingForSensor": "Waiting for a motion sensor to be connected."
+      },
+      "controls": {
+        "walker": "Sensor reading",
+        "walkerHelp": "This marker follows the motion sensor. Walk toward or away from the sensor to move it.",
+        "connectButton": "Connect to a PASCO wireless motion sensor",
+        "disconnectButton": "Disconnect the motion sensor",
+        "recordButton": "Start recording",
+        "stopButton": "Stop recording",
+        "clearButton": "Clear the recorded motion"
+      }
+    }
+  }
+}

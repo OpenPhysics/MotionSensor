@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Motion Sensor: a recorded position-vs-time trace on its axes, with the
+       sensor at the origin. Colours match MotionSensorColors' default profile. -->
+  <rect width="512" height="512" fill="#1a1a2e"/>
+  <g stroke="#2a3f5f" stroke-width="6">
+    <line x1="112" y1="150" x2="440" y2="150"/>
+    <line x1="112" y1="250" x2="440" y2="250"/>
+    <line x1="112" y1="350" x2="440" y2="350"/>
+    <line x1="222" y1="70" x2="222" y2="420"/>
+    <line x1="331" y1="70" x2="331" y2="420"/>
+  </g>
+  <g stroke="#5a7fa8" stroke-width="12" stroke-linecap="round">
+    <line x1="112" y1="70" x2="112" y2="420"/>
+    <line x1="112" y1="420" x2="440" y2="420"/>
+  </g>
+  <path d="M112 400 Q 276 60 440 400" fill="none" stroke="#4fc3f7" stroke-width="26"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="48" y="376" width="46" height="66" rx="10" fill="#b0bec5"/>
+  <circle cx="71" cy="409" r="14" fill="#1a1a2e"/>
+</svg>

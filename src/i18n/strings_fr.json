@@ -1,0 +1,122 @@
+{
+  "title": "Capteur de mouvement",
+  "screens": {
+    "simulation": "Simulation",
+    "sensor": "Capteur de mouvement"
+  },
+  "showGraph": "Afficher le graphique",
+  "showTable": "Afficher le tableau",
+  "motionDiagram": "Diagramme de mouvement · points toutes les 1 s",
+  "showMotionDiagram": "Afficher le diagramme de mouvement",
+  "showVelocityVectors": "Afficher les vecteurs de vitesse",
+  "axes": {
+    "time": "Temps",
+    "position": "Position",
+    "velocity": "Vitesse",
+    "acceleration": "Accélération"
+  },
+  "run": {
+    "record": "Enregistrer",
+    "stop": "Arrêter",
+    "clear": "Effacer",
+    "sampleRate": "Fréquence d'échantillonnage",
+    "sampleRatePattern": "{{rate}} Hz",
+    "elapsedPattern": "{{time}} s",
+    "connectFirst": "Connectez un capteur pour enregistrer"
+  },
+  "graph": {
+    "vs": "selon",
+    "xAxis": "Axe horizontal",
+    "yAxis": "Axe vertical",
+    "rescale": "Ajuster les axes aux données",
+    "zoomIn": "Zoom avant",
+    "zoomOut": "Zoom arrière",
+    "panLeft": "Déplacer vers la gauche",
+    "panRight": "Déplacer vers la droite",
+    "panUp": "Déplacer vers le haut",
+    "panDown": "Déplacer vers le bas",
+    "xAxisChanged": "L'axe horizontal est maintenant {{property}}. Le graphique a été effacé.",
+    "yAxisChanged": "L'axe vertical est maintenant {{property}}. Le graphique a été effacé."
+  },
+  "table": {
+    "columnA": "Première colonne",
+    "columnB": "Deuxième colonne",
+    "download": "Télécharger en CSV",
+    "rowsPattern": "Lignes {{first}} à {{last}} sur {{total}}",
+    "empty": "Aucune donnée enregistrée",
+    "scrollUp": "Faire défiler le tableau vers le haut",
+    "scrollDown": "Faire défiler le tableau vers le bas",
+    "headerPattern": "{{name}} ({{unit}})"
+  },
+  "sensor": {
+    "connect": "Connecter le capteur",
+    "disconnect": "Déconnecter",
+    "statusDisconnected": "Déconnecté",
+    "statusConnecting": "Connexion…",
+    "statusConnected": "Connecté",
+    "statusError": "Problème de connexion",
+    "lostConnection": "Le capteur s'est déconnecté.",
+    "unavailableInsecure": "Web Bluetooth exige une page sécurisée. Ouvrez cette simulation en HTTPS, ou sur localhost.",
+    "unavailableBrowser": "Ce navigateur ne peut pas se connecter au capteur. Utilisez Chrome, Edge ou Opera.",
+    "rawPositionPattern": "Capteur : {{position}} m"
+  },
+  "sensorOptions": {
+    "title": "Options du capteur",
+    "changeSign": "Inverser le signe",
+    "zeroAtStart": "Mettre le capteur à zéro au démarrage",
+    "zeroNow": "Mettre à zéro maintenant",
+    "removeZero": "Supprimer le décalage de zéro",
+    "range": "Portée",
+    "rangeLong": "Longue",
+    "rangeShort": "Courte",
+    "offsetPattern": "Décalage de zéro : {{offset}} m"
+  },
+  "preferences": {
+    "title": "Simulation",
+    "showDiagnostics": "Afficher les diagnostics du capteur"
+  },
+  "a11y": {
+    "simulation": {
+      "screenSummary": {
+        "playArea": "La zone de jeu montre une piste avec un marcheur que vous pouvez déplacer, et un graphique du mouvement que vous enregistrez.",
+        "controlArea": "La zone de contrôle contient les deux sélecteurs d'axe du graphique, les cases afficher le graphique et afficher le tableau, le tableau de données avec ses sélecteurs de colonne et son téléchargement CSV, le sélecteur de fréquence d'échantillonnage, les boutons enregistrer, arrêter et effacer, et un bouton Tout réinitialiser.",
+        "interactionHint": "Appuyez sur Enregistrer, puis déplacez le marcheur le long de la piste et regardez le graphique tracer votre mouvement."
+      },
+      "currentDetails": {
+        "ready": "Prêt à enregistrer. Rien n'a encore été enregistré.",
+        "recording": "Enregistrement en cours. {{time}} secondes jusqu'ici.",
+        "stopped": "Enregistrement arrêté après {{time}} secondes.",
+        "waitingForSensor": "En attente de la connexion d'un capteur de mouvement."
+      },
+      "controls": {
+        "walker": "Marcheur",
+        "walkerHelp": "Déplacez-vous à gauche et à droite pour changer votre distance au capteur.",
+        "recordButton": "Démarrer l'enregistrement",
+        "stopButton": "Arrêter l'enregistrement",
+        "clearButton": "Effacer le mouvement enregistré"
+      }
+    },
+    "sensor": {
+      "screenSummary": {
+        "playArea": "La zone de jeu montre une piste avec un repère qui suit le capteur de mouvement, et un graphique du mouvement que vous enregistrez.",
+        "controlArea": "La zone de contrôle contient les deux sélecteurs d'axe du graphique, les cases afficher le graphique et afficher le tableau, le tableau de données avec ses sélecteurs de colonne et son téléchargement CSV, le sélecteur de fréquence d'échantillonnage, le panneau de connexion du capteur, le panneau d'options du capteur, les boutons enregistrer, arrêter et effacer, et un bouton Tout réinitialiser.",
+        "interactionHint": "Connectez le capteur, appuyez sur Enregistrer, puis marchez vers lui ou éloignez-vous et regardez le graphique tracer votre mouvement."
+      },
+      "currentDetails": {
+        "ready": "Prêt à enregistrer. Rien n'a encore été enregistré.",
+        "recording": "Enregistrement en cours. {{time}} secondes jusqu'ici.",
+        "stopped": "Enregistrement arrêté après {{time}} secondes.",
+        "waitingForSensor": "En attente de la connexion d'un capteur de mouvement."
+      },
+      "controls": {
+        "walker": "Mesure du capteur",
+        "walkerHelp": "Ce repère suit le capteur de mouvement. Marchez vers le capteur ou éloignez-vous pour le déplacer.",
+        "connectButton": "Se connecter à un capteur de mouvement sans fil PASCO",
+        "disconnectButton": "Déconnecter le capteur de mouvement",
+        "recordButton": "Démarrer l'enregistrement",
+        "stopButton": "Arrêter l'enregistrement",
+        "clearButton": "Effacer le mouvement enregistré"
+      }
+    }
+  }
+}
