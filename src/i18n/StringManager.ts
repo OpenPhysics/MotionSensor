@@ -146,21 +146,6 @@ export class StringManager {
     return stringProperties.showGraphStringProperty;
   }
 
-  /** Label for the optional equal-time-dot motion diagram. */
-  public getMotionDiagramStringProperty(): ReadOnlyProperty<string> {
-    return stringProperties.motionDiagramStringProperty;
-  }
-
-  /** Label for the per-screen motion-diagram checkbox. */
-  public getShowMotionDiagramStringProperty(): ReadOnlyProperty<string> {
-    return stringProperties.showMotionDiagramStringProperty;
-  }
-
-  /** Label for optional velocity arrows on motion-diagram points. */
-  public getShowVelocityVectorsStringProperty(): ReadOnlyProperty<string> {
-    return stringProperties.showVelocityVectorsStringProperty;
-  }
-
   /** Label for the data table's visibility checkbox. */
   public getShowTableStringProperty(): ReadOnlyProperty<string> {
     return stringProperties.showTableStringProperty;

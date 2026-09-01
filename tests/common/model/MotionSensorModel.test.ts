@@ -13,7 +13,12 @@ import { MotionSensorModel } from "../../../src/common/model/MotionSensorModel.j
 import { PointerPositionSource } from "../../../src/common/model/PointerPositionSource.js";
 import { PositionSourceType } from "../../../src/common/model/PositionSource.js";
 import { RunState } from "../../../src/common/model/RunState.js";
-import { DEFAULT_SAMPLE_PERIOD_S, MAX_RECORD_DURATION_S } from "../../../src/MotionSensorConstants.js";
+import {
+  DEFAULT_SAMPLE_PERIOD_S,
+  DEFAULT_SAMPLE_RATE_HZ,
+  MAX_RECORD_DURATION_S,
+  SAMPLE_RATE_CHOICES_HZ,
+} from "../../../src/MotionSensorConstants.js";
 
 /** Steps the model in sample-sized ticks, as the sim's clock does. */
 function advance(model: MotionSensorModel, seconds: number): void {
@@ -176,6 +181,89 @@ describe("MotionSensorModel", () => {
   it("tracks the source's position while idle, so the graph is live before Record", () => {
     source.walkerPositionProperty.value = 1.4;
     expect(model.positionProperty.value).toBeCloseTo(1.4, 12);
+  });
+
+  it("starts at the default sample rate", () => {
+    expect(model.sampleRateProperty.value).toBe(DEFAULT_SAMPLE_RATE_HZ);
+  });
+
+  it("records at whichever rate was chosen, with times still on exact multiples", () => {
+    for (const rate of SAMPLE_RATE_CHOICES_HZ) {
+      model.sampleRateProperty.value = rate;
+      model.startRecording();
+      // One second of frames at the chosen period: t = 0 is a real sample, so a
+      // second of ticks leaves rate + 1 of them.
+      for (let i = 0; i < rate; i++) {
+        model.step(1 / rate);
+      }
+      const samples = model.getPositionSamples();
+      expect(samples).toHaveLength(rate + 1);
+      samples.forEach((sample, index) => {
+        expect(sample.time).toBeCloseTo(index / rate, 12);
+      });
+      model.stopRecording();
+    }
+  });
+
+  it("holds a rate change until the next recording, so one trace has one spacing", () => {
+    model.startRecording();
+    advance(model, 1);
+    model.sampleRateProperty.value = 5;
+
+    // The run in progress keeps the rate it started with.
+    advance(model, 1);
+    const samples = model.getPositionSamples();
+    samples.forEach((sample, index) => {
+      expect(sample.time).toBeCloseTo(index * DEFAULT_SAMPLE_PERIOD_S, 12);
+    });
+    model.stopRecording();
+
+    // The next one picks the new rate up.
+    model.startRecording();
+    for (let i = 0; i < 5; i++) {
+      model.step(1 / 5);
+    }
+    expect(model.getPositionSamples()).toHaveLength(6);
+    expect(model.timeProperty.value).toBeCloseTo(1, 12);
+  });
+
+  it("caps a recording by duration, not by sample count, at every rate", () => {
+    for (const rate of SAMPLE_RATE_CHOICES_HZ) {
+      model.sampleRateProperty.value = rate;
+      model.startRecording();
+      const ticks = Math.round((MAX_RECORD_DURATION_S + 1) * rate);
+      for (let i = 0; i < ticks; i++) {
+        model.step(1 / rate);
+      }
+      expect(model.runStateProperty.value).toBe(RunState.STOPPED);
+      // The cap is a sample count — MAX_RECORD_DURATION_S x rate of them — so
+      // the last sample lands one period short of the full minute, whatever the
+      // rate. What must not happen is a rate changing how long a run may be.
+      expect(model.getPositionSamples()).toHaveLength(MAX_RECORD_DURATION_S * rate);
+      expect(model.timeProperty.value).toBeCloseTo(MAX_RECORD_DURATION_S - 1 / rate, 6);
+    }
+  });
+
+  it("smooths over the same 0.2 s however fast it is sampling", () => {
+    // A steady 0.5 m/s walk must read as 0.5 m/s at every rate: the derivative
+    // window is a duration, so a slow rate is not smoothed into a lower speed.
+    for (const rate of SAMPLE_RATE_CHOICES_HZ) {
+      source.walkerPositionProperty.value = 0;
+      model.sampleRateProperty.value = rate;
+      model.startRecording();
+      for (let i = 1; i <= 3 * rate; i++) {
+        source.walkerPositionProperty.value = i * 0.5 * (1 / rate);
+        model.step(1 / rate);
+      }
+      expect(model.velocityProperty.value).toBeCloseTo(0.5, 6);
+      model.stopRecording();
+    }
+  });
+
+  it("puts the rate back to the default on reset", () => {
+    model.sampleRateProperty.value = 50;
+    model.reset();
+    expect(model.sampleRateProperty.value).toBe(DEFAULT_SAMPLE_RATE_HZ);
   });
 
   it("survives being disposed twice", () => {

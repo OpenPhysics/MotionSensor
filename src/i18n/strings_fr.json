@@ -6,9 +6,6 @@
   },
   "showGraph": "Afficher le graphique",
   "showTable": "Afficher le tableau",
-  "motionDiagram": "Diagramme de mouvement · points toutes les 1 s",
-  "showMotionDiagram": "Afficher le diagramme de mouvement",
-  "showVelocityVectors": "Afficher les vecteurs de vitesse",
   "axes": {
     "time": "Temps",
     "position": "Position",

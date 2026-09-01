@@ -7,7 +7,8 @@ Sim-specific context for AI assistants. General SceneryStack guidance:
 
 Record position over time and plot it on a graph whose axes the student chooses
 — with the mouse on the **Simulation** screen, or in front of a PASCO Wireless
-Motion Sensor (PS-3219) over Web Bluetooth on the **Motion Sensor** screen.
+Motion Sensor (PS-3219) over Web Bluetooth on the **Motion Sensor** screen. The
+same recording can be read as a table of two columns and downloaded as CSV.
 A data logger, not a game: there is no target curve and no score.
 
 Architecture and rationale live in [`doc/implementation-notes.md`](doc/implementation-notes.md);
@@ -25,6 +26,10 @@ Read both before changing model code.
 | `src/common/model/SensorPositionSource.ts` | The PASCO link: lazy device, poll loop, never-rejecting connect |
 | `src/common/view/MotionSensorScreenView.ts` | **One** ScreenView, used by both screens |
 | `src/common/view/graph/` | `ConfigurableGraph` and its data manager, controls panel and gesture handler |
+| `src/common/view/DataTableNode.ts` | The recording as two chosen columns, scrolling + CSV download |
+| `src/common/view/dataTableCsv.ts` | CSV text from those columns (pure) |
+| `src/common/view/SensorOptionsPanel.ts` | Change sign, zero at start / now, remove offset, range |
+| `src/common/model/sensorMeasurement.ts` | Range gate + zero/sign arithmetic (pure) |
 | `src/common/view/PlayAreaNode.ts` | Track, sensor, walker + drag / keyboard listeners |
 | `src/simulation/`, `src/sensor/` | Thin screen packages; the models are ten lines each |
 
@@ -50,8 +55,9 @@ Two things about it are specific to this sim:
 
 - **It is fed from `model.sampleEmitter`, not from `step()`.** The sims it came
   from call `addDataPoint()` once per animation frame, which spaces points by
-  frame time. Here the model owns a fixed 20 Hz clock and the view listens to it,
-  so the same walk plots identically at 60 and 144 Hz.
+  frame time. Here the model owns a fixed clock, at the rate the student chose,
+  and the view listens to it, so the same walk plots identically at 60 and
+  144 Hz.
 - **Changing an axis *replots*, it does not clear.** Upstream blanks the graph,
   which is fine when the sim regenerates data every frame and useless for a
   one-shot recording. Each `PlottableProperty` here carries a `samples` accessor
@@ -67,6 +73,16 @@ Two things about it are specific to this sim:
   throws `DeviceSelectionCancelled` internally and is not shown as an error.
 - **Never accumulate recording time in a float.** Sample times are
   `index × period`; tests pin it.
+- **The sample rate is a student's choice, captured at Record.** Never read
+  `sampleRateProperty` per tick, and never count a derivative window in samples:
+  `windowSamplesForRate()` turns 0.2 s into samples so the same walk reads as the
+  same speed at 5 Hz and at 50 Hz.
+- **The table and the graph share one plottable list.** Feed
+  `DataTableNode` the array the graph gets; two lists would let a name mean
+  different series in the two places.
+- **Sensor Range is a host-side filter, not a device command.** PASCO's config
+  opcodes are not in `PascoMotionProtocol.ts` — do not invent one. See
+  `SensorRange.ts`.
 - **`dispose()` must stay idempotent** — axon Properties throw on double
   dispose, and the memory-leak suite disposes twice on purpose. The ScreenView
   disposes the graph explicitly; the graph is not a plain child.

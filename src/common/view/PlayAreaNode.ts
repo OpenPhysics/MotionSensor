@@ -117,7 +117,10 @@ export class PlayAreaNode extends Node {
     this.children = [track, beam, ground, marks, sensorBody, this.walkerNode];
 
     const positionListener = (metres: number) => {
-      this.walkerNode.centerX = transform.modelToViewX(metres);
+      // Clamped for drawing only: a sensor reading with the sign flipped, or
+      // zeroed from the far end of the room, is a real measurement that belongs
+      // on the graph but has nowhere to stand on a 0-2 m track.
+      this.walkerNode.centerX = transform.modelToViewX(POSITION_RANGE_M.constrainValue(metres));
       this.walkerNode.top = GROUND_Y - WALKER_HEIGHT;
     };
     providedOptions.positionProperty.link(positionListener);

@@ -7,21 +7,27 @@
  * position comes from, so they share a view rather than each owning a
  * near-copy. Two options carry the whole difference: a writable position
  * property makes the walker draggable, and a sensor source adds the connection
- * panel. Everything else — graph, track, motion diagram, record controls — is
- * identical by construction, which is what makes a student's second screen feel
- * like the same activity with real hardware attached.
+ * and sensor-options panels. Everything else — graph, table, track, record
+ * controls — is identical by construction, which is what makes a student's
+ * second screen feel like the same activity with real hardware attached.
  *
  * ── Why the graph is fed from an emitter ──────────────────────────────────────
  * ConfigurableGraph samples whichever two Properties are on its axes when
  * addDataPoint() is called. Calling that once per animation frame — as the sims
  * this graph came from do — would space points by frame time, so the same walk
  * would look different on a 60 Hz and a 144 Hz display. Here the model owns a
- * fixed 20 Hz clock and emits on it, and the view listens.
+ * fixed clock and emits on it, and the view listens.
+ *
+ * ── Graph and table share one display area ────────────────────────────────────
+ * Both are views of the same recording, so the table opens over the graph rather
+ * than squeezing the track. The graph is draggable and both are one checkbox
+ * away, which is what makes stacking them workable: a student who wants to see
+ * both moves the graph, and one who only wants numbers turns the graph off.
  */
 
 import { BooleanProperty, type NumberProperty, type TReadOnlyProperty } from "scenerystack/axon";
 import { type EmptySelfOptions, optionize } from "scenerystack/phet-core";
-import { HBox, Node, Rectangle, Text, VBox } from "scenerystack/scenery";
+import { Node, Rectangle, Text, VBox } from "scenerystack/scenery";
 import { PhetFont, ResetAllButton } from "scenerystack/scenery-phet";
 import { ScreenView, type ScreenViewOptions } from "scenerystack/sim";
 import { Checkbox } from "scenerystack/sun";
@@ -33,17 +39,27 @@ import MotionSensorColors from "../../MotionSensorColors.js";
 import { GRAPH_HEIGHT, GRAPH_WIDTH, MAX_GRAPH_DATA_POINTS, SCREEN_VIEW_MARGIN } from "../../MotionSensorConstants.js";
 import type { MotionSensorModel } from "../model/MotionSensorModel.js";
 import type { SensorPositionSource } from "../model/SensorPositionSource.js";
+import { DataTableNode } from "./DataTableNode.js";
 import ConfigurableGraph from "./graph/ConfigurableGraph.js";
 import type { PlottableProperty } from "./graph/PlottableProperty.js";
-import { MotionDiagramNode } from "./MotionDiagramNode.js";
 import { PlayAreaNode } from "./PlayAreaNode.js";
 import { RecordControl } from "./RecordControl.js";
+import { SensorOptionsPanel } from "./SensorOptionsPanel.js";
 import { SensorPanel } from "./SensorPanel.js";
 
 const LABEL_FONT = new PhetFont(12);
 
-/** Width of the track and motion diagram beneath the graph. */
+/** Width of the track beneath the graph. */
 const PLAY_AREA_WIDTH = 560;
+
+/**
+ * Height of the graph's own header bar, which is part of its bounds and sits
+ * above the plot. The table clears it rather than covering the axis pickers.
+ */
+const GRAPH_HEADER_HEIGHT = 30;
+
+/** Gap between the data table and the graph's edges, in pixels. */
+const TABLE_INSET = 10;
 
 export type MotionSensorScreenViewSelfOptions = {
   readonly a11y: ScreenA11yStrings;
@@ -59,8 +75,8 @@ export type MotionSensorScreenViewOptions = MotionSensorScreenViewSelfOptions & 
 
 export class MotionSensorScreenView extends ScreenView {
   private readonly graph: ConfigurableGraph;
-  private readonly showMotionDiagramProperty: BooleanProperty;
-  private readonly showVelocityVectorsProperty: BooleanProperty;
+  private readonly dataTable: DataTableNode;
+  private readonly showTableProperty: BooleanProperty;
   private readonly disposeMotionSensorScreenView: () => void;
 
   public constructor(model: MotionSensorModel, providedOptions: MotionSensorScreenViewOptions) {
@@ -159,54 +175,44 @@ export class MotionSensorScreenView extends ScreenView {
         : {}),
     });
     playAreaNode.left = SCREEN_VIEW_MARGIN;
-    playAreaNode.bottom = this.layoutBounds.maxY - SCREEN_VIEW_MARGIN - 78;
+    playAreaNode.bottom = this.layoutBounds.maxY - SCREEN_VIEW_MARGIN;
     this.addChild(playAreaNode);
 
-    const showMotionDiagramProperty = new BooleanProperty(false);
-    const showVelocityVectorsProperty = new BooleanProperty(false);
-    this.showMotionDiagramProperty = showMotionDiagramProperty;
-    this.showVelocityVectorsProperty = showVelocityVectorsProperty;
-    const motionDiagramNode = new MotionDiagramNode(
-      model,
-      PLAY_AREA_WIDTH,
-      showMotionDiagramProperty,
-      showVelocityVectorsProperty,
-    );
-    motionDiagramNode.left = SCREEN_VIEW_MARGIN;
-    motionDiagramNode.top = playAreaNode.bottom + 10;
-    this.addChild(motionDiagramNode);
+    // Off to begin with: the graph is this sim's primary display and the table
+    // is the second look a student takes at the same recording.
+    const showTableProperty = new BooleanProperty(false);
+    this.showTableProperty = showTableProperty;
 
-    const recordControl = new RecordControl(model, a11y);
+    const dataTable = new DataTableNode({
+      model: model,
+      plottableProperties: plottableProperties,
+      listParent: comboBoxListParent,
+      visibleProperty: showTableProperty,
+    });
+    // Tucked into the graph's top-right corner, clear of the header bar that
+    // carries the axis pickers: the table covers the plot's right-hand side
+    // while the vertical axis, its labels and both axis pickers stay readable,
+    // and the table's own column pickers never sit level with the graph's,
+    // where the four would read as one crowded row.
+    dataTable.right = graph.right - TABLE_INSET;
+    dataTable.top = graph.top + GRAPH_HEADER_HEIGHT + TABLE_INSET;
+    this.dataTable = dataTable;
+    this.addChild(dataTable);
+
+    const recordControl = new RecordControl(model, a11y, comboBoxListParent);
 
     const showGraphCheckbox = MotionSensorScreenView.createCheckbox(
       graph.getGraphVisibleProperty(),
       strings.getShowGraphStringProperty(),
     );
-    const motionDiagramCheckbox = MotionSensorScreenView.createCheckbox(
-      showMotionDiagramProperty,
-      strings.getShowMotionDiagramStringProperty(),
-    );
-    const velocityVectorsCheckbox = MotionSensorScreenView.createCheckbox(
-      showVelocityVectorsProperty,
-      strings.getShowVelocityVectorsStringProperty(),
-      showMotionDiagramProperty,
+    const showTableCheckbox = MotionSensorScreenView.createCheckbox(
+      showTableProperty,
+      strings.getShowTableStringProperty(),
     );
     const viewControl = new VBox({
       align: "left",
       spacing: 7,
-      children: [
-        showGraphCheckbox,
-        motionDiagramCheckbox,
-        // Indented under the checkbox that enables it, so the dependency reads
-        // as a dependency rather than as a third peer.
-        new HBox({
-          spacing: 6,
-          children: [
-            new Rectangle(0, 0, 18, 1, { fill: null, stroke: null, pickable: false }),
-            velocityVectorsCheckbox,
-          ],
-        }),
-      ],
+      children: [showGraphCheckbox, showTableCheckbox],
     });
 
     const sensorSource = providedOptions.sensorSource;
@@ -221,10 +227,22 @@ export class MotionSensorScreenView extends ScreenView {
           })
         : null;
 
+    // Only the sensor screen has readings to adjust, so the options panel comes
+    // and goes with the connection panel.
+    const sensorOptionsPanel =
+      sensorSource === undefined
+        ? null
+        : new SensorOptionsPanel({ source: sensorSource, listParent: comboBoxListParent });
+
     const controlColumn = new VBox({
       align: "left",
       spacing: 14,
-      children: [viewControl, recordControl, ...(sensorPanel === null ? [] : [sensorPanel])],
+      children: [
+        viewControl,
+        recordControl,
+        ...(sensorPanel === null ? [] : [sensorPanel]),
+        ...(sensorOptionsPanel === null ? [] : [sensorOptionsPanel]),
+      ],
       right: this.layoutBounds.maxX - SCREEN_VIEW_MARGIN,
       top: SCREEN_VIEW_MARGIN,
     });
@@ -251,14 +269,28 @@ export class MotionSensorScreenView extends ScreenView {
         pdomOrder: [
           graph,
           showGraphCheckbox,
-          motionDiagramCheckbox,
-          velocityVectorsCheckbox,
+          showTableCheckbox,
+          dataTable.columnAComboBox,
+          dataTable.columnBComboBox,
+          dataTable.scrollUpButton,
+          dataTable.scrollDownButton,
+          dataTable.downloadButton,
           recordControl.recordButton,
           recordControl.stopButton,
           recordControl.clearButton,
+          recordControl.sampleRateComboBox,
           ...(providedOptions.writablePositionProperty ? [playAreaNode.walkerNode] : []),
           ...(sensorPanel?.connectButton ? [sensorPanel.connectButton] : []),
           ...(sensorPanel ? [sensorPanel.disconnectButton] : []),
+          ...(sensorOptionsPanel
+            ? [
+                sensorOptionsPanel.changeSignCheckbox,
+                sensorOptionsPanel.zeroAtStartCheckbox,
+                sensorOptionsPanel.zeroNowButton,
+                sensorOptionsPanel.removeZeroButton,
+                sensorOptionsPanel.rangeComboBox,
+              ]
+            : []),
           resetAllButton,
         ],
       }),
@@ -267,20 +299,13 @@ export class MotionSensorScreenView extends ScreenView {
     this.disposeMotionSensorScreenView = () => {
       model.sampleEmitter.removeListener(sampleListener);
       model.traceChangedProperty.unlink(runStateListener);
-      showMotionDiagramProperty.dispose();
-      showVelocityVectorsProperty.dispose();
+      sensorOptionsPanel?.dispose();
+      showTableProperty.dispose();
     };
   }
 
-  /**
-   * A labelled checkbox in the shared style. `enabledProperty` gates a checkbox
-   * whose effect only exists while another one is on.
-   */
-  private static createCheckbox(
-    property: BooleanProperty,
-    labelProperty: TReadOnlyProperty<string>,
-    enabledProperty?: BooleanProperty,
-  ): Checkbox {
+  /** A labelled checkbox in the shared style. */
+  private static createCheckbox(property: BooleanProperty, labelProperty: TReadOnlyProperty<string>): Checkbox {
     return new Checkbox(
       property,
       new Text(labelProperty, {
@@ -291,20 +316,22 @@ export class MotionSensorScreenView extends ScreenView {
       {
         ...SIM_CHECKBOX_OPTIONS,
         accessibleName: labelProperty,
-        ...(enabledProperty ? { enabledProperty: enabledProperty } : {}),
       },
     );
   }
 
   public reset(): void {
     this.graph.reset();
-    this.showMotionDiagramProperty.reset();
-    this.showVelocityVectorsProperty.reset();
+    this.dataTable.reset();
+    this.showTableProperty.reset();
   }
 
   public override dispose(): void {
     this.disposeMotionSensorScreenView();
     this.graph.dispose();
+    // Like the graph, the table owns combo boxes and derived Properties that
+    // outlive plain child disposal.
+    this.dataTable.dispose();
     super.dispose();
   }
 }

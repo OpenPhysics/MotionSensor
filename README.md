@@ -23,9 +23,15 @@ them are something you discover rather than something the simulation asserts.
 - **Two screens, one activity.** Drag a figure with mouse, touch or keyboard;
   then do the same thing with a real **PASCO Wireless Motion Sensor (PS-3219)**
   over Web Bluetooth — no driver, no app, no install.
+- **A table of the numbers, and a CSV of them.** *Show table* puts two chosen
+  quantities side by side, one row per sample, following the newest row as a
+  recording grows — and *Download CSV* writes exactly those two columns to a
+  file for a lab write-up.
 - **One clock, whatever the frame rate.** Samples are taken on the model's own
-  fixed 20 Hz clock, so the same walk gives the same graph on a 60 Hz laptop and
-  a 144 Hz display.
+  fixed clock — 5, 10, 20 or 50 Hz, your choice — so the same walk gives the
+  same graph on a 60 Hz laptop and a 144 Hz display.
+- **The sensor settings PASCO's own software offers.** Change sign, zero at the
+  start of a run, zero now, remove the zero offset, and long or short range.
 - **Fully keyboard operable**, with a live screen-reader summary of the
   recording and spoken announcements when an axis changes.
 - Installable and offline-capable (PWA), with a projector-friendly colour
@@ -47,6 +53,13 @@ so instead of offering a button that cannot work.
 
 Add `?showDiagnostics=true` to see the device's measurement list and its raw
 readings — useful when bringing hardware up.
+
+**Sensor options** on that screen adjust what the readings *mean*: reverse the
+sign, zero the sensor where the student is standing (now, or at the start of
+each run), and pick the range. Range is applied on the host as an acceptance
+window — long accepts echoes out to the PS-3219's full 4 m, short only to 2 m,
+which is what PASCO recommends for carts and tracks — because the device's own
+configuration opcodes are not part of the wire protocol this sim speaks.
 
 ## Scripts
 

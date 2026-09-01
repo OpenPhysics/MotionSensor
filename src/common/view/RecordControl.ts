@@ -10,24 +10,31 @@
  *
  * Clear stays visible but disabled while there is nothing to clear, so the
  * control set does not reflow as the recording moves through its states.
+ *
+ * The sample-rate chooser lives here rather than in a panel of its own because
+ * it is a property of the recording, not of the display. It is disabled while a
+ * recording runs: the rate is captured when Record is pressed, and a control
+ * that appears to work but changes nothing until next time is worse than one
+ * that plainly cannot be used yet.
  */
 
 import { DerivedProperty, PatternStringProperty } from "scenerystack/axon";
 import { toFixed } from "scenerystack/dot";
-import { HBox, RichText, Text, VBox } from "scenerystack/scenery";
+import { HBox, type Node, RichText, Text, VBox } from "scenerystack/scenery";
 import { PhetFont } from "scenerystack/scenery-phet";
-import { RectangularPushButton } from "scenerystack/sun";
+import { ComboBox, RectangularPushButton } from "scenerystack/sun";
 import { FLAT_PANEL_PUSH_BUTTON_OPTIONS, LIGHT_SURFACE_TEXT_FILL } from "../../common/MotionSensorButtonOptions.js";
 import { MotionSensorPanel } from "../../common/MotionSensorPanel.js";
 import type { ScreenA11yStrings } from "../../i18n/StringManager.js";
 import { StringManager } from "../../i18n/StringManager.js";
 import MotionSensorColors from "../../MotionSensorColors.js";
-import { CONTROL_PANEL_WIDTH } from "../../MotionSensorConstants.js";
+import { CONTROL_PANEL_WIDTH, SAMPLE_RATE_CHOICES_HZ } from "../../MotionSensorConstants.js";
 import type { MotionSensorModel } from "../model/MotionSensorModel.js";
 import { PositionSourceType } from "../model/PositionSource.js";
 import { RunState } from "../model/RunState.js";
 
 const BUTTON_FONT = new PhetFont(15);
+const LABEL_FONT = new PhetFont(12);
 const TIME_FONT = new PhetFont({ size: 26, weight: "bold" });
 const MESSAGE_FONT = new PhetFont(14);
 
@@ -39,10 +46,12 @@ export class RecordControl extends MotionSensorPanel {
   public readonly recordButton: RectangularPushButton;
   public readonly stopButton: RectangularPushButton;
   public readonly clearButton: RectangularPushButton;
+  public readonly sampleRateComboBox: ComboBox<number>;
 
   private readonly disposeRecordControl: () => void;
 
-  public constructor(model: MotionSensorModel, a11y: ScreenA11yStrings) {
+  /** @param listParent - where the sample-rate combo box's popup goes, above everything else */
+  public constructor(model: MotionSensorModel, a11y: ScreenA11yStrings, listParent: Node) {
     const runStrings = StringManager.getInstance().getRunStrings();
 
     const isRecordingProperty = new DerivedProperty([model.runStateProperty], (state) => state === RunState.RECORDING);
@@ -72,6 +81,41 @@ export class RecordControl extends MotionSensorPanel {
       listener: () => model.clearRun(),
       accessibleName: a11y.controls.clearButtonStringProperty,
       enabledProperty: hasRecordingProperty,
+    });
+
+    // One item per allowed rate, each label built from the same "{{rate}} Hz"
+    // pattern so a locale that writes units differently only has to say so once.
+    const rateLabelProperties: { dispose(): void }[] = [];
+    const rateItems = SAMPLE_RATE_CHOICES_HZ.map((rate) => {
+      const labelProperty = new PatternStringProperty(runStrings.sampleRatePatternStringProperty, { rate: rate });
+      rateLabelProperties.push(labelProperty);
+      return {
+        value: rate,
+        createNode: () => new Text(labelProperty, { font: LABEL_FONT, fill: MotionSensorColors.textColorProperty }),
+      };
+    });
+    const sampleRateComboBox = new ComboBox(model.sampleRateProperty, rateItems, listParent, {
+      cornerRadius: 4,
+      xMargin: 6,
+      yMargin: 3,
+      buttonFill: MotionSensorColors.panelBackgroundColorProperty,
+      buttonStroke: MotionSensorColors.panelBorderColorProperty,
+      listFill: MotionSensorColors.panelBackgroundColorProperty,
+      listStroke: MotionSensorColors.panelBorderColorProperty,
+      highlightFill: MotionSensorColors.panelBorderColorProperty,
+      accessibleName: runStrings.sampleRateStringProperty,
+      enabledProperty: isIdleProperty,
+    });
+    const sampleRateRow = new HBox({
+      spacing: 8,
+      children: [
+        new Text(runStrings.sampleRateStringProperty, {
+          font: LABEL_FONT,
+          fill: MotionSensorColors.textColorProperty,
+          maxWidth: CONTROL_PANEL_WIDTH - 140,
+        }),
+        sampleRateComboBox,
+      ],
     });
 
     // The readout carries its unit, so the number is never alone on screen.
@@ -109,6 +153,7 @@ export class RecordControl extends MotionSensorPanel {
         children: [
           elapsedText,
           new HBox({ spacing: 10, children: [recordButton, stopButton, clearButton] }),
+          sampleRateRow,
           connectFirstText,
         ],
       }),
@@ -119,7 +164,10 @@ export class RecordControl extends MotionSensorPanel {
     this.stopButton = stopButton;
     this.clearButton = clearButton;
 
+    this.sampleRateComboBox = sampleRateComboBox;
+
     this.disposeRecordControl = () => {
+      sampleRateComboBox.dispose();
       for (const property of [
         isRecordingProperty,
         isIdleProperty,
@@ -127,6 +175,7 @@ export class RecordControl extends MotionSensorPanel {
         elapsedProperty,
         elapsedValueProperty,
         needsSensorProperty,
+        ...rateLabelProperties,
       ]) {
         property.dispose();
       }

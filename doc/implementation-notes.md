@@ -89,8 +89,9 @@ Three decisions are specific to this sim:
 
 - **Points come from `model.sampleEmitter`, not from `step()`.** Upstream calls
   `addDataPoint()` once per animation frame, which spaces points by frame time;
-  here the model owns a fixed 20 Hz clock and the view listens to it. It is the
-  same reason sample times are integer multiples of the period.
+  here the model owns a fixed clock — at whichever rate the student chose — and
+  the view listens to it. It is the same reason sample times are integer
+  multiples of the period.
 - **The graph is disposed explicitly** by the ScreenView rather than relying on
   child disposal, so its combo boxes, derived Properties and pointer listeners
   come down with it.
@@ -102,10 +103,61 @@ Three decisions are specific to this sim:
   series from the recorded values. The four series must stay index-aligned;
   they all come off the same clock, so they are.
 
+## The data table
+
+`DataTableNode` is the same recording read as numbers: two columns chosen from
+the **same `PlottableProperty` list the graph's axes use**, so a name means one
+series in both places and the columns stay aligned row for row — every series
+comes off the one clock.
+
+Three decisions worth knowing:
+
+- **It reads `samples()`, not `property.value`.** The table is a view of the
+  trace, so scrolling back through a finished recording shows what was recorded
+  rather than what the walker is doing now. It follows the newest row while a
+  recording grows and stops following the moment a student scrolls away from the
+  end, the way a log window does.
+- **It opens over the graph, not beside it.** Both are views of the same
+  recording and the screen has no third place to put one. The table is tucked
+  into the graph's top-right corner, clear of the axis pickers; the graph is
+  draggable and both are one checkbox away, so a student who wants both moves the
+  graph, and one who only wants numbers turns the graph off.
+- **The CSV is `dataTableCsv.ts`, pure and tested.** The file leaves the sim for
+  a spreadsheet where nobody checks it against the graph again, so column
+  alignment, the heading row and the decimal count are pinned by tests rather
+  than by eye. The download writes exactly the two columns on screen.
+
+Like the graph, the table is **disposed explicitly** by the ScreenView: it owns
+combo boxes, derived Properties and an input listener that plain child disposal
+would leave behind.
+
+## Sensor options
+
+`SensorOptionsPanel` offers the four adjustments PASCO's own software puts on a
+motion sensor's properties sheet. All four are applied host-side in
+`SensorPositionSource`, in one place and one order — see doc/model.md — and the
+arithmetic itself lives in `sensorMeasurement.ts`, pure and unit-tested, because
+the transport underneath it cannot be exercised in CI at all.
+
+The range is the one to be careful about. On the device it is a receiver gain
+ramp that PASCO's software sets over the link; PASCO's configuration opcodes are
+not part of the protocol this sim speaks, so here it is an acceptance window on
+the echo distance (`SensorRange`). If the opcode is ever documented, the switch
+belongs in `PascoMotionProtocol.ts` and this gate becomes the fallback for
+devices that reject it.
+
 ## Things that will bite
 
 - **Web Bluetooth needs a user gesture.** The `requestDevice()` call in
   `connect()` is synchronous for that reason. Do not `await` anything ahead of it.
+- **The sample rate is captured at Record, not read per tick.** A rate change
+  mid-run would put two spacings on one trace and make `index × period` disagree
+  with the samples already taken; `Trace` holds its own window size for the same
+  reason, so a rate chosen for the next run cannot re-shape the velocity curve
+  already on screen.
+- **Derivative windows are durations, not sample counts.** `windowSamplesForRate`
+  turns 0.2 s into samples, so the same walk reads as the same speed at 5 Hz and
+  at 50 Hz.
 - **Do not accumulate recording time in a float.** Sample times come from an
   integer index times the period. An earlier version of the sibling MotionMatch
   added 0.05 repeatedly and ended runs one sample early; the tests pin this.

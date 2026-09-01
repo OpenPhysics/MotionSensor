@@ -35,7 +35,6 @@ import {
   DEFAULT_POLL_INTERVAL_MS,
   MAXIMUM_CONSECUTIVE_FAILURES,
   POSITION_MEASUREMENT,
-  SENSOR_MINIMUM_RANGE_M,
   SENSOR_REPORTED_RANGE_M,
 } from "../../MotionSensorConstants.js";
 import MotionSensorNamespace from "../../MotionSensorNamespace.js";
@@ -43,7 +42,8 @@ import { BluetoothMotionSensor, DeviceSelectionCancelled } from "../../sensor/mo
 import { echoTimeToMetres } from "../../sensor/model/PascoMotionProtocol.js";
 import { ConnectionState, type ConnectionStateValue } from "./ConnectionState.js";
 import { PositionSourceType, type PositionSourceTypeValue, type TPositionSource } from "./PositionSource.js";
-import { maximumDistanceForRange, SensorRange, type SensorRangeValue } from "./SensorRange.js";
+import { SensorRange, type SensorRangeValue } from "./SensorRange.js";
+import { adjustReading, isEchoInRange } from "./sensorMeasurement.js";
 
 export type SensorPositionSourceOptions = {
   /** Poll period in milliseconds; overridable from a query parameter for bring-up. */
@@ -286,9 +286,7 @@ export class SensorPositionSource implements TPositionSource {
       }
 
       this.consecutiveFailures = 0;
-      if (Number.isFinite(metres)) {
-        this.publishDistance(metres);
-      }
+      this.publishDistance(metres);
     } catch (error) {
       if (generation !== this.pollingGeneration) {
         return;
@@ -318,7 +316,7 @@ export class SensorPositionSource implements TPositionSource {
       try {
         const echoTimeMicroseconds = await this.device.readEchoTime();
         const metres = echoTimeToMetres(echoTimeMicroseconds);
-        if (Number.isFinite(metres) && this.isEchoInRange(metres)) {
+        if (isEchoInRange(metres, this.rangeProperty.value)) {
           this.lastRawDistanceM = metres;
         }
       } catch {
@@ -336,11 +334,6 @@ export class SensorPositionSource implements TPositionSource {
     this.zeroOffsetProperty.value = 0;
   }
 
-  /** Whether an echo at this distance is inside the selected range's window. */
-  private isEchoInRange(metres: number): boolean {
-    return metres >= SENSOR_MINIMUM_RANGE_M && metres <= maximumDistanceForRange(this.rangeProperty.value);
-  }
-
   /**
    * Applies the range gate and the student's adjustments to one raw distance and
    * publishes the result.
@@ -350,7 +343,7 @@ export class SensorPositionSource implements TPositionSource {
    * of a lie than pinning the walker to the end of the track.
    */
   private publishDistance(metres: number): void {
-    if (!this.isEchoInRange(metres)) {
+    if (!isEchoInRange(metres, this.rangeProperty.value)) {
       return;
     }
     this.lastRawDistanceM = metres;
@@ -358,9 +351,11 @@ export class SensorPositionSource implements TPositionSource {
       this.zeroOnNextReading = false;
       this.zeroOffsetProperty.value = metres;
     }
-    const zeroed = metres - this.zeroOffsetProperty.value;
-    const signed = this.changeSignProperty.value ? -zeroed : zeroed;
-    this.sensorPositionProperty.value = SENSOR_REPORTED_RANGE_M.constrainValue(signed);
+    const adjusted = adjustReading(metres, {
+      zeroOffsetM: this.zeroOffsetProperty.value,
+      changeSign: this.changeSignProperty.value,
+    });
+    this.sensorPositionProperty.value = SENSOR_REPORTED_RANGE_M.constrainValue(adjusted);
   }
 
   /**

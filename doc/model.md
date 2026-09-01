@@ -29,7 +29,7 @@ Four quantities, either of which can go on either axis:
 | Position | m | measured — the source, clamped to the 0–2 m track |
 | Velocity | m/s | trailing derivative of the smoothed position trace |
 | Acceleration | m/s² | trailing derivative of the velocity series |
-| Time | s | `sampleIndex × 0.05 s` |
+| Time | s | `sampleIndex × sample period` |
 
 Twelve ordered pairs, then, of which the interesting ones are position-time,
 velocity-time and acceleration-time — and velocity against position, a phase
@@ -44,32 +44,46 @@ it again.
 
 ## Sampling
 
-A recording is sampled at **20 Hz** on a fixed-timestep accumulator, not on raw
-frame `dt`. Three consequences that matter:
+A recording is sampled on a fixed-timestep accumulator, not on raw frame `dt`,
+at a rate the student picks from **5, 10, 20 or 50 Hz** (20 Hz by default).
+Three consequences that matter:
 
 - The same walk produces the same graph whether it came from a 144 Hz display or
   from a sensor answering every 40 ms.
-- Sample times are computed as `index × 0.05 s`, never accumulated. Repeatedly
+- Sample times are computed as `index × period`, never accumulated. Repeatedly
   adding 0.05 drifts — three seconds of it sums to 2.9999999999999996 — and a
   graph whose x values slowly slid off the grid would be quietly wrong.
 - The graph's time axis is evenly spaced instead of bunching wherever the browser
   happened to be busy. The view therefore adds points from the model's
   `sampleEmitter`, not from the frame loop.
 
+The rate is captured when Record is pressed and held for the whole run: changing
+it mid-recording would put two spacings on one trace, and `index × period` would
+stop agreeing with the samples already taken. The chooser is disabled while a
+recording runs, so it never looks as though it did something it did not.
+
+The ends of the list are set by physics rather than by taste. Below 5 Hz a walk
+is too coarsely sampled for the derivative chain to mean anything; above 50 Hz
+the sensor cannot answer every tick — one BLE round trip takes tens of
+milliseconds — so the trace would repeat stale readings and report a stationary
+student who was moving.
+
 A `dt` above 0.25 s is treated as a backgrounded tab rather than a slow frame and
 clamped, so returning to the tab does not paste in a long flat stretch the
 student was never present for.
 
 Recording ends when the student presses Stop, or at
-`MAX_RECORD_DURATION_S = 60 s` — 1200 samples, comfortably inside the graph's
-2000-point buffer, so it is the cap that ends a recording and never the buffer
-silently dropping the beginning.
+`MAX_RECORD_DURATION_S = 60 s` — 3000 samples at the fastest rate, comfortably
+inside the graph's 3200-point buffer, so it is the cap that ends a recording and
+never the buffer silently dropping the beginning.
 
 ## The derivative chain
 
-Position is smoothed with a **causal 5-sample trailing mean**, then
-differentiated twice, each time with a **trailing least-squares window of 5
-samples** (0.2 s at 20 Hz):
+Position is smoothed with a **causal trailing mean**, then differentiated twice,
+each time with a **trailing least-squares window spanning 0.2 s** — five samples
+at 20 Hz, ten at 50 Hz, a floor of three at the slowest rate. The window is a
+duration rather than a sample count precisely because the rate is a choice: the
+same walk must read as the same speed at 5 Hz and at 50 Hz.
 
 ```
 position ──trailing mean──▶ smoothed ──d/dt──▶ velocity ──d/dt──▶ acceleration
@@ -113,15 +127,44 @@ at up to 250 Hz, with 1 mm resolution. It reports a raw echo time in
 microseconds; position is `echo / 10⁶ × 344 m/s ÷ 2`, computed host-side.
 
 While recording, the sim requests the two-byte echo time every 40 ms — faster
-than it samples, so a fresh reading is always waiting when the fixed clock takes
-one. Polling stops when the recording does, so the transducer is silent and the
-last position remains displayed. The Bluetooth connection stays open for another
-recording.
+than it samples at every rate up to 20 Hz, so a fresh reading is waiting when the
+fixed clock takes one. At 50 Hz the link is the limit and some samples repeat the
+previous reading. Polling stops when the recording does, so the transducer is
+silent and the last position remains displayed. The Bluetooth connection stays
+open for another recording.
 
-A reading of exactly 0 means no echo returned: there was nothing within
-0.15–4 m in front of the sensor to reflect off. This is a measurement result,
-not a fault, which is why the sim clamps rather than rejects it.
+### From echo time to published position
 
-Although the sensor reaches 4 m, the track is **0–2 m** — a practical maximum
-walking distance for a classroom. Readings are clamped to it, so an out-of-range
-echo parks the walker at the end of the track instead of flinging it off.
+Everything a student can change about a reading is applied host-side, in one
+place and in this order:
+
+```
+echo time ─▶ distance ─▶ range gate ─▶ − zero offset ─▶ × sign ─▶ published
+```
+
+- **Range** decides which echoes to believe: **Long** accepts 0.15–4 m, the
+  device's full reach; **Short** accepts 0.15–2 m, which is what PASCO
+  recommends for carts and tracks, where a far echo is far more likely to be a
+  wall than the target. A reading outside the window is *dropped*, not clamped —
+  holding the previous position is less of a lie than pinning the walker to the
+  end of the track. A reading of exactly 0 means no echo returned at all, and is
+  dropped by the same rule.
+
+  On the device this setting is a gain ramp, and PASCO's own software sets it
+  over the link. It is a host-side filter here because PASCO's configuration
+  opcodes are not part of the wire protocol this sim speaks, and guessing a
+  command to write to real hardware is not a thing to do on a hunch.
+
+- **Zero offset** subtracts a captured distance, so displacement can be measured
+  from wherever the student is standing. *Zero Sensor Now* takes a fresh one-shot
+  reading when nothing is being recorded, or uses the latest one when the poll
+  loop already owns the link; *zero at start* captures the first accepted reading
+  of each run.
+
+- **Change sign** negates what is left. Zeroing happens first, so an offset taken
+  at 1.2 m still puts zero where the student stood once the axis is reversed.
+
+The track drawn on screen is **0–2 m**, a practical classroom walking distance,
+and the walker is clamped to it for drawing only: a sign-flipped or zeroed
+reading is a real measurement that belongs on the graph and in the table even
+when it has nowhere to stand on the track.
