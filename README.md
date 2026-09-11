@@ -1,6 +1,6 @@
 # Motion Sensor
 
-[![CI](https://github.com/OpenPhysics/MotionSensor/actions/workflows/ci.yml/badge.svg)](https://github.com/OpenPhysics/MotionSensor/actions/workflows/ci.yml)
+[![CI](../../actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
 
 Record how something moves and read the result off a graph you configure
 yourself — with the mouse on one screen, or by walking in front of a PASCO
@@ -97,8 +97,8 @@ origin.
 ## License
 
 GNU Affero General Public License v3.0 or later — see the
-[org LICENSE](https://github.com/OpenPhysics/.github/blob/main/LICENSE).
+[org LICENSE](https://github.com/OpenLyceum/.github/blob/main/LICENSE).
 
 ## Contributing
 
-See the [org contributing guide](https://github.com/OpenPhysics/.github/blob/main/CONTRIBUTING.md).
+See the [org contributing guide](https://github.com/OpenLyceum/.github/blob/main/CONTRIBUTING.md).

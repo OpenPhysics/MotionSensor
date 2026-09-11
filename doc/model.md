@@ -15,7 +15,7 @@ what a slope means, what a zero slope means, and how position, velocity and
 acceleration of the same motion relate.
 
 There is no target curve and no score. That is the deliberate difference from
-the sibling [MotionMatch](https://github.com/OpenPhysics/MotionMatch): where
+the sibling [MotionMatch](https://github.com/OpenLyceum/MotionMatch): where
 that sim asks "can you produce *this* graph?", this one asks "what does the
 graph of what you just did look like — and what does it look like on other
 axes?"

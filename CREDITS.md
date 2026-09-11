@@ -7,13 +7,13 @@ acceleration on a graph whose axes you choose.
 ## Upstream code
 
 The configurable graph in `src/common/view/graph/` is a copy-fork of the
-component of the same name in the sibling OpenPhysics simulations
-[ACPhasor](https://github.com/OpenPhysics/ACPhasor),
-[Resonance](https://github.com/OpenPhysics/Resonance) and
-[OscillationsAndChaos](https://github.com/OpenPhysics/OscillationsAndChaos),
+component of the same name in the sibling OpenLyceum simulations
+[ACPhasor](https://github.com/OpenLyceum/ACPhasor),
+[Resonance](https://github.com/OpenLyceum/Resonance) and
+[OscillationsAndChaos](https://github.com/OpenLyceum/OscillationsAndChaos),
 where it originated. The `TPositionSource` seam, the PASCO transport and the
 play area came from the sibling
-[MotionMatch](https://github.com/OpenPhysics/MotionMatch) simulation.
+[MotionMatch](https://github.com/OpenLyceum/MotionMatch) simulation.
 
 This simulation is not affiliated with, endorsed by, or a product of PASCO
 Scientific.
@@ -33,4 +33,4 @@ programmatically from SceneryStack primitives. The sim ships no image assets.
 ## License
 
 GNU Affero General Public License v3.0 or later — see the
-[org LICENSE](https://github.com/OpenPhysics/.github/blob/main/LICENSE).
+[org LICENSE](https://github.com/OpenLyceum/.github/blob/main/LICENSE).
